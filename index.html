@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Recordatorios Fáciles</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style id="app-style">
+    :root {
+      --primary: #ff7f50;
+      --secondary: #4da6ff;
+      --accent: #66cc66;
+      --light: #f8f9fa;
+      --dark: #343a40;
+      --font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background-color: #f0f8ff;
+      padding-top: 2rem;
+      min-height: 100vh;
+    }
+
+    .app-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: white;
+      border-radius: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .app-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .app-title {
+      color: var(--primary);
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .app-description {
+      color: var(--dark);
+      font-size: 1.1rem;
+    }
+
+    .btn-action {
+      border-radius: 15px;
+      padding: 15px 25px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      margin: 10px;
+      width: 220px;
+    }
+
+    .btn-primary-custom {
+      background-color: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+
+    .btn-primary-custom:hover {
+      background-color: #ff6b3d;
+      border-color: #ff6b3d;
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary-custom {
+      background-color: var(--secondary);
+      border-color: var(--secondary);
+      color: white;
+    }
+
+    .btn-secondary-custom:hover {
+      background-color: #3d96ff;
+      border-color: #3d96ff;
+      transform: translateY(-2px);
+    }
+
+    .reminder-list {
+      margin-top: 30px;
+      border-top: 2px dashed #e9ecef;
+      padding-top: 20px;
+    }
+
+    .reminder-item {
+      background-color: white;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-left: 5px solid var(--secondary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      transition: all 0.2s ease;
+    }
+
+    .reminder-item:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transform: translateX(2px);
+    }
+
+    .reminder-time {
+      font-weight: bold;
+      color: var(--secondary);
+      font-size: 1.2rem;
+    }
+
+    .reminder-message {
+      flex-grow: 1;
+      margin-left: 15px;
+      color: var(--dark);
+    }
+
+    .reminder-delete {
+      color: #dc3545;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 50%;
+      transition: all 0.2s;
+    }
+
+    .reminder-delete:hover {
+      background-color: rgba(220, 53, 69, 0.1);
+    }
+
+    .modal-content {
+      border-radius: 20px;
+      border: none;
+    }
+
+    .modal-header {
+      background-color: var(--primary);
+      color: white;
+      border-radius: 20px 20px 0 0;
+      border-bottom: none;
+    }
+
+    .modal-footer {
+      border-top: none;
+    }
+
+    .btn-save {
+      background-color: var(--accent);
+      border-color: var(--accent);
+      color: white;
+      border-radius: 10px;
+      padding: 10px 20px;
+      font-weight: 600;
+    }
+
+    .btn-save:hover {
+      background-color: #5cb85c;
+      border-color: #5cb85c;
+    }
+
+    .export-section {
+      text-align: center;
+      margin-top: 30px;
+    }
+
+    .btn-export {
+      background-color: var(--accent);
+      border-color: var(--accent);
+      color: white;
+      border-radius: 10px;
+      padding: 8px 15px;
+      font-size: 0.9rem;
+    }
+
+    .btn-export:hover {
+      background-color: #5cb85c;
+      border-color: #5cb85c;
+    }
+
+    .empty-list-message {
+      text-align: center;
+      color: #6c757d;
+      margin: 30px 0;
+      font-style: italic;
+    }
+
+    .notification-modal .modal-content {
+      border-left: 6px solid var(--primary);
+    }
+
+    .notification-title {
+      color: var(--primary);
+      font-weight: bold;
+    }
+
+    .notification-time {
+      color: var(--secondary);
+      font-size: 1.3rem;
+      font-weight: bold;
+    }
+
+    .csv-info {
+      font-size: 0.9rem;
+      color: #6c757d;
+      margin-top: 5px;
+    }
+
+    .action-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 576px) {
+      .app-container {
+        padding: 15px;
+        border-radius: 15px;
+      }
+
+      .btn-action {
+        width: 100%;
+        margin: 5px 0;
+      }
+
+      .reminder-item {
+        padding: 12px;
+      }
+
+      .reminder-time {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container app-container">
+    <div class="app-header">
+      <h1 class="app-title">Recordatorios Fáciles</h1>
+      <p class="app-description">Crea y gestiona tus recordatorios de forma simple</p>
+    </div>
+
+    <div class="action-buttons">
+      <button class="btn btn-action btn-primary-custom" id="addReminderBtn">
+        <i class="fas fa-plus-circle me-2"></i>Agregar manualmente
+      </button>
+      <button class="btn btn-action btn-secondary-custom" id="importCSVBtn">
+        <i class="fas fa-file-import me-2"></i>Importar CSV
+      </button>
+    </div>
+
+    <div class="reminder-list">
+      <h3 class="mb-4">Próximos recordatorios</h3>
+      <div id="remindersList">
+        <!-- Los recordatorios se agregarán dinámicamente aquí -->
+        <div class="empty-list-message" id="emptyListMessage">
+          <i class="fas fa-bell-slash fa-2x mb-3"></i>
+          <p>No tienes recordatorios pendientes</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="export-section">
+      <button class="btn btn-export" id="exportCSVBtn">
+        <i class="fas fa-file-export me-2"></i>Exportar recordatorios como CSV
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal para agregar recordatorio -->
+  <div class="modal fade" id="addReminderModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Agregar nuevo recordatorio</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="reminderForm">
+            <div class="mb-3">
+              <label for="reminderTime" class="form-label">Hora (HH:MM)</label>
+              <input type="time" class="form-control" id="reminderTime" required>
+            </div>
+            <div class="mb-3">
+              <label for="reminderMessage" class="form-label">Mensaje</label>
+              <textarea class="form-control" id="reminderMessage" rows="3" required placeholder="Escribe tu mensaje aquí..."></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-save" id="saveReminderBtn">Guardar recordatorio</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para importar CSV -->
+  <div class="modal fade" id="importCSVModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Importar recordatorios desde CSV</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="csvForm">
+            <div class="mb-3">
+              <label for="csvFile" class="form-label">Selecciona archivo CSV</label>
+              <input type="file" class="form-control" id="csvFile" accept=".csv" required>
+              <div class="csv-info">
+                <p class="mb-1"><small>El archivo debe tener formato: hora,mensaje</small></p>
+                <p class="mb-1"><small>Ejemplo: 14:30,Reunión de trabajo</small></p>
+                <p><small>Tamaño máximo: 25MB</small></p>
+              </div>
+            </div>
+          </form>
+          <div id="csvFeedback" class="mt-3"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-save" id="processCSVBtn">Procesar archivo</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de notificación -->
+  <div class="modal fade notification-modal" id="notificationModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title notification-title">¡Recordatorio!</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p class="notification-time" id="notificationTime">12:00</p>
+          <p class="notification-message" id="notificationMessage">Contenido del recordatorio</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Entendido</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script id="app-script">
+    document.addEventListener('DOMContentLoaded', function() {
+      // Elementos del DOM
+      const addReminderBtn = document.getElementById('addReminderBtn');
+      const importCSVBtn = document.getElementById('importCSVBtn');
+      const saveReminderBtn = document.getElementById('saveReminderBtn');
+      const processCSVBtn = document.getElementById('processCSVBtn');
+      const exportCSVBtn = document.getElementById('exportCSVBtn');
+      const remindersList = document.getElementById('remindersList');
+      const emptyListMessage = document.getElementById('emptyListMessage');
+
+      // Modales de Bootstrap
+      const addReminderModal = new bootstrap.Modal(document.getElementById('addReminderModal'));
+      const importCSVModal = new bootstrap.Modal(document.getElementById('importCSVModal'));
+      const notificationModal = new bootstrap.Modal(document.getElementById('notificationModal'));
+      
+      // Sonido de alerta
+      const alertSound = new Audio('https://assets.mixkit.co/active_storage/sfx/951/951-preview.mp3');
+      
+      // Estado de la aplicación
+      let reminders = [];
+      
+      // Cargar recordatorios del almacenamiento local al iniciar
+      loadReminders();
+      
+      // Configurar temporizador para verificar recordatorios cada minuto
+      setInterval(checkReminders, 60000); // Revisar cada minuto
+      checkReminders(); // Revisar inmediatamente al cargar
+      
+      // Configurar eventos
+      addReminderBtn.addEventListener('click', () => addReminderModal.show());
+      importCSVBtn.addEventListener('click', () => importCSVModal.show());
+      saveReminderBtn.addEventListener('click', saveReminder);
+      processCSVBtn.addEventListener('click', processCSV);
+      exportCSVBtn.addEventListener('click', exportCSV);
+      
+      // Funciones principales
+      function saveReminder() {
+        const timeInput = document.getElementById('reminderTime');
+        const messageInput = document.getElementById('reminderMessage');
+        
+        if (!timeInput.value || !messageInput.value) {
+          alert('Por favor completa todos los campos');
+          return;
+        }
+        
+        const reminder = {
+          time: timeInput.value,
+          message: messageInput.value.trim(),
+          id: Date.now() // ID único basado en timestamp
+        };
+        
+        reminders.push(reminder);
+        saveReminders();
+        renderReminders();
+        addReminderModal.hide();
+        
+        // Limpiar formulario
+        timeInput.value = '';
+        messageInput.value = '';
+        
+        // Mostrar mensaje de éxito
+        showToast('Recordatorio guardado correctamente');
+      }
+      
+      function processCSV() {
+        const fileInput = document.getElementById('csvFile');
+        const feedbackDiv = document.getElementById('csvFeedback');
+        
+        if (!fileInput.files || fileInput.files.length === 0) {
+          feedbackDiv.innerHTML = '<div class="alert alert-danger">Por favor selecciona un archivo CSV</div>';
+          return;
+        }
+        
+        const file = fileInput.files[0];
+        
+        // Verificar tamaño del archivo
+        if (file.size > 25 * 1024 * 1024) { // 25MB
+          feedbackDiv.innerHTML = '<div class="alert alert-danger">El archivo excede el tamaño máximo permitido (25MB)</div>';
+          return;
+        }
+        
+        feedbackDiv.innerHTML = '<div class="alert alert-info">Procesando archivo...</div>';
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          try {
+            const lines = e.target.result.split('\n');
+            const newReminders = [];
+            let errors = [];
+            
+            lines.forEach((line, index) => {
+              if (!line.trim()) return; // Ignorar líneas vacías
+              
+              const parts = line.split(',');
+              if (parts.length < 2) {
+                errors.push(`Línea ${index + 1}: Formato incorrecto`);
+                return;
+              }
+              
+              const time = parts[0].trim();
+              // Validar formato de hora (HH:MM)
+              if (!/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(time)) {
+                errors.push(`Línea ${index + 1}: Formato de hora incorrecto "${time}"`);
+                return;
+              }
+              
+              const message = parts.slice(1).join(',').trim();
+              if (!message) {
+                errors.push(`Línea ${index + 1}: Mensaje vacío`);
+                return;
+              }
+              
+              newReminders.push({
+                time,
+                message,
+                id: Date.now() + index // ID único
+              });
+            });
+            
+            if (errors.length > 0) {
+              feedbackDiv.innerHTML = `
+                <div class="alert alert-warning">
+                  <p><strong>Se encontraron ${errors.length} errores:</strong></p>
+                  <ul class="mb-0">
+                    ${errors.map(err => `<li>${err}</li>`).join('')}
+                  </ul>
+                </div>
+              `;
+              return;
+            }
+            
+            // Agregar nuevos recordatorios
+            reminders = [...reminders, ...newReminders];
+            saveReminders();
+            renderReminders();
+            
+            feedbackDiv.innerHTML = `
+              <div class="alert alert-success">
+                Se importaron correctamente ${newReminders.length} recordatorios.
+              </div>
+            `;
+            
+            // Limpiar input de archivo
+            fileInput.value = '';
+            
+            // Cerrar modal después de 2 segundos
+            setTimeout(() => {
+              importCSVModal.hide();
+            }, 2000);
+            
+          } catch (error) {
+            feedbackDiv.innerHTML = `
+              <div class="alert alert-danger">
+                Error al procesar el archivo: ${error.message}
+              </div>
+            `;
+          }
+        };
+        
+        reader.onerror = function() {
+          feedbackDiv.innerHTML = '<div class="alert alert-danger">Error al leer el archivo</div>';
+        };
+        
+        reader.readAsText(file);
+      }
+      
+      function exportCSV() {
+        if (reminders.length === 0) {
+          alert('No hay recordatorios para exportar');
+          return;
+        }
+        
+        // Crear contenido CSV
+        const csvContent = reminders.map(r => `${r.time},${r.message}`).join('\n');
+        
+        // Crear blob y descargar
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `recordatorios_${formatDate(new Date())}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        showToast('Archivo CSV exportado correctamente');
+      }
+      
+      function deleteReminder(id) {
+        if (confirm('¿Estás seguro de que deseas eliminar este recordatorio?')) {
+          reminders = reminders.filter(r => r.id !== id);
+          saveReminders();
+          renderReminders();
+          showToast('Recordatorio eliminado');
+        }
+      }
+      
+      // Funciones auxiliares
+      function loadReminders() {
+        const saved = localStorage.getItem('reminders');
+        if (saved) {
+          try {
+            reminders = JSON.parse(saved);
+            renderReminders();
+          } catch (e) {
+            console.error('Error al cargar recordatorios:', e);
+            localStorage.removeItem('reminders');
+            reminders = [];
+          }
+        }
+      }
+      
+      function saveReminders() {
+        // Ordenar recordatorios por hora
+        reminders.sort((a, b) => {
+          return a.time.localeCompare(b.time);
+        });
+        
+        localStorage.setItem('reminders', JSON.stringify(reminders));
+      }
+      
+      function renderReminders() {
+        if (reminders.length === 0) {
+          emptyListMessage.style.display = 'block';
+          remindersList.innerHTML = '';
+          remindersList.appendChild(emptyListMessage);
+          return;
+        }
+        
+        emptyListMessage.style.display = 'none';
+        
+        // Crear la lista HTML
+        let html = '';
+        reminders.forEach(reminder => {
+          html += `
+            <div class="reminder-item" data-id="${reminder.id}">
+              <div class="reminder-time">${reminder.time}</div>
+              <div class="reminder-message">${escapeHtml(reminder.message)}</div>
+              <div class="reminder-delete" onclick="deleteReminderById(${reminder.id})">
+                <i class="fas fa-trash-alt"></i>
+              </div>
+            </div>
+          `;
+        });
+        
+        remindersList.innerHTML = html;
+      }
+      
+      function checkReminders() {
+        const now = new Date();
+        const currentTimeString = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+        
+        reminders.forEach(reminder => {
+          if (reminder.time === currentTimeString) {
+            showNotification(reminder);
+          }
+        });
+      }
+      
+      function showNotification(reminder) {
+        // Configurar contenido del modal
+        document.getElementById('notificationTime').textContent = reminder.time;
+        document.getElementById('notificationMessage').textContent = reminder.message;
+        
+        // Mostrar modal y reproducir sonido
+        notificationModal.show();
+        alertSound.play();
+      }
+      
+      function formatDate(date) {
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+      }
+      
+      function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+      
+      function showToast(message) {
+        // Crear toast dinámicamente
+        const toastContainer = document.createElement('div');
+        toastContainer.style.position = 'fixed';
+        toastContainer.style.bottom = '20px';
+        toastContainer.style.right = '20px';
+        toastContainer.style.zIndex = '1050';
+        
+        const toast = document.createElement('div');
+        toast.className = 'toast show';
+        toast.style.backgroundColor = 'var(--primary)';
+        toast.style.color = 'white';
+        toast.style.padding = '10px 15px';
+        toast.style.borderRadius = '10px';
+        toast.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
+        toast.textContent = message;
+        
+        toastContainer.appendChild(toast);
+        document.body.appendChild(toastContainer);
+        
+        setTimeout(() => {
+          document.body.removeChild(toastContainer);
+        }, 3000);
+      }
+      
+      // Exponer la función de eliminar para el onclick
+      window.deleteReminderById = function(id) {
+        deleteReminder(id);
+      };
+    });
+  </script>
+</body>
+</html>
